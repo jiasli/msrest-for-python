@@ -541,6 +541,14 @@ class Serializer(object):
         if data is None:
             raise ValidationError("required", "body", True)
 
+        # Allow data_type to be constructed from a JSON string
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError as err:
+                raise_with_traceback(SerializationError,
+                                     "Unable to decode JSON string '{}': {}".format(data, str(err)), err)
+
         # Just in case this is a dict
         internal_data_type = data_type.strip('[]{}')
         internal_data_type = self.dependencies.get(internal_data_type, None)
